@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>蓝晒冲洗水回用台</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header>
+    <div>
+      <h1>蓝晒冲洗水回用台</h1>
+      <div class="meta">水缸登记 · 分用途冲洗 · 超时复检 · 底片用水履历</div>
+    </div>
+    <button id="reload">刷新</button>
+  </header>
+
+  <div class="stats" id="stats"></div>
+
+  <nav class="tabs" id="tabs">
+    <button data-tab="board" class="active">水缸总览</button>
+    <button data-tab="create">建缸</button>
+    <button data-tab="rinse">登记冲洗</button>
+    <button data-tab="pending">待复检 <span class="badge" id="pendingBadge"></span></button>
+    <button data-tab="history">用水履历</button>
+  </nav>
+
+  <div id="msg"></div>
+
+  <main>
+    <section id="tab-board" class="tab">
+      <div class="panel">
+        <h2>水缸总览</h2>
+        <p class="meta" id="limitLine"></p>
+        <div class="grid" id="tankCards"></div>
+      </div>
+    </section>
+
+    <section id="tab-create" class="tab hidden">
+      <form id="createForm" class="panel narrow">
+        <h2>建缸</h2>
+        <label>水缸名称</label><input name="name" required placeholder="如 丁缸">
+        <label>水源</label><input name="source" required placeholder="如 井水过滤 / 回收静置水 / 雨水收集">
+        <label>容量（升）</label><input name="capacity" type="number" min="1" step="1" required>
+        <label>银盐浓度（mg/L）</label><input name="silver" type="number" step="0.01" min="0" required>
+        <label>浊度（NTU）</label><input name="turbidity" type="number" step="0.1" min="0" required>
+        <label>检测时间（留空为当前）</label><input name="testedAt" type="datetime-local" id="createTestedAt">
+        <label>检测人</label><input name="testedBy" required>
+        <button>建缸</button>
+      </form>
+    </section>
+
+    <section id="tab-rinse" class="tab hidden">
+      <div class="two-col">
+        <form id="rinseForm" class="panel">
+          <h2>登记冲洗</h2>
+          <label>底片编号</label><input name="film" required placeholder="如 CN-001">
+          <label>水缸（待复检的缸不可选）</label><select name="tankId" id="rinseTank"></select>
+          <label>用途</label><select name="stage" id="rinseStage"></select>
+          <label>冲洗日期</label><input name="date" type="date" id="rinseDate" required>
+          <label>时段</label><select name="slot" id="rinseSlot"></select>
+          <label>用水量（升）</label><input name="liters" type="number" step="0.5" min="0.5" required>
+          <label>操作人</label><input name="operator" required>
+          <button>登记冲洗</button>
+        </form>
+        <div class="panel">
+          <h2>有效冲洗记录</h2>
+          <p class="meta">同一缸同一时段只接受一张底片，重复请求会指出占用底片且不写入用量。</p>
+          <div id="rinseTable"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-pending" class="tab hidden">
+      <div class="panel">
+        <h2>待复检水缸</h2>
+        <p class="meta">浓度超限、浊度过高、检测超过八小时或许可被退回的缸只能待复检；由检测人之外的另一人复检，连续两次合格才重新开放。</p>
+        <div class="grid" id="pendingList"></div>
+      </div>
+      <div class="two-col">
+        <form id="recheckForm" class="panel">
+          <h2>登记复检</h2>
+          <label>水缸（仅待复检）</label><select name="tankId" id="recheckTank"></select>
+          <label>复检人（须不同于检测人）</label><input name="by" required>
+          <label>银盐浓度（mg/L）</label><input name="silver" type="number" step="0.01" min="0" required>
+          <label>浊度（NTU）</label><input name="turbidity" type="number" step="0.1" min="0" required>
+          <button>提交复检</button>
+        </form>
+        <form id="retestForm" class="panel">
+          <h2>改写检测</h2>
+          <p class="meta">改检测会退回原使用许可，该许可下的后续冲洗记录一并退回重算。</p>
+          <label>水缸</label><select name="tankId" id="retestTank"></select>
+          <label>银盐浓度（mg/L）</label><input name="silver" type="number" step="0.01" min="0" required>
+          <label>浊度（NTU）</label><input name="turbidity" type="number" step="0.1" min="0" required>
+          <label>检测人</label><input name="testedBy" required>
+          <label>检测时间（留空为当前）</label><input name="testedAt" type="datetime-local">
+          <button>改写检测</button>
+        </form>
+      </div>
+    </section>
+
+    <section id="tab-history" class="tab hidden">
+      <div class="panel">
+        <h2>底片用水履历</h2>
+        <div class="toolbar">
+          <input id="filmQuery" placeholder="底片编号，如 CN-001">
+          <button id="filmSearch" type="button">查询</button>
+        </div>
+        <div class="chips" id="filmChips"></div>
+        <div id="historyTable"></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>
